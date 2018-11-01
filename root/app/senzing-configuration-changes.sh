@@ -81,4 +81,4 @@ echo "$(date)" >> ${SENTINAL_FILE}
 
 # Run the command specified by the parameters.
 
-$@
+exec $@
