@@ -29,7 +29,7 @@ RUN pip install \
 
 ADD ./downloads/ibm_data_server_driver_for_odbc_cli_linuxx64_v11.1.tar.gz /opt/IBM/db2
 
-# Copy the repository's app directory.
+# Copy files from repository.
 
 COPY ./root /
 
@@ -43,5 +43,5 @@ ENV PATH=$PATH:/opt/IBM/db2/clidriver/adm:/opt/IBM/db2/clidriver/bin
 
 # Run-time command.
 
-ENTRYPOINT ["/app/senzing-configuration-changes.sh"]
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
 CMD ["python"]
