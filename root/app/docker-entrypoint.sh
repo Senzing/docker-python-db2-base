@@ -15,7 +15,7 @@ NOT_OK=1
 # Short-circuit for certain commandline options.
 
 if [ "$1" == "--version" ]; then
-  echo "senzing-configuration-changes.sh version ${VERSION}"
+  echo "docker-entrypoint.sh version ${VERSION}"
   exit ${OK}
 fi
 
