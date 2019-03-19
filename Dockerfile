@@ -106,6 +106,10 @@ COPY --from=builder [ \
     "/opt/IBM/db2/jdbc/" \
     ]
 
+# FIXME: For testing only.
+
+ADD ./downloads/ibm_data_server_driver_for_odbc_cli_linuxx64_v11.1.tar.gz /opt/IBM/db2
+
 # Install packages via apt.
 
 RUN apt-get update \
@@ -134,7 +138,7 @@ RUN pip install \
 
 ENV SENZING_ROOT=/opt/senzing
 ENV PYTHONPATH=${SENZING_ROOT}/g2/python
-ENV LD_LIBRARY_PATH=${SENZING_ROOT}/g2/lib:${SENZING_ROOT}/g2/lib/debian
+ENV LD_LIBRARY_PATH=${SENZING_ROOT}/g2/lib:${SENZING_ROOT}/g2/lib/debian:/opt/IBM/db2/clidriver/lib
 ENV DB2_CLI_DRIVER_INSTALL_PATH=/opt/IBM/db2/clidriver
 ENV PATH=$PATH:/opt/IBM/db2/clidriver/adm:/opt/IBM/db2/clidriver/bin
 
