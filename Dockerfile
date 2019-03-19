@@ -5,9 +5,9 @@
 ARG BASE_IMAGE=debian:9
 FROM ${BASE_IMAGE} as builder
 
-ENV REFRESHED_AT=2019-03-09
+ENV REFRESHED_AT=2019-03-19
 
-LABEL Name="senzing/python-db2-base" \
+LABEL Name="senzing/python-db2-base-builder" \
       Version="1.0.0"
 
 RUN apt-get update \
@@ -15,10 +15,12 @@ RUN apt-get update \
       unzip
 
 # Copy the DB2 ODBC client code.
-# The tar.gz file must be independently downloaded before the docker build.
+# The tar.gz files must be independently downloaded before the docker build.
 
 ADD ./downloads/ibm_data_server_driver_for_odbc_cli_linuxx64_v11.1.tar.gz /opt/IBM/db2
 ADD ./downloads/v11.1.4fp4a_jdbc_sqlj.tar.gz /tmp/db2-jdbc-sqlj
+
+# Extract ZIP file.
 
 RUN unzip -d /tmp/extracted-jdbc /tmp/db2-jdbc-sqlj/jdbc_sqlj/db2_db2driver_for_jdbc_sqlj.zip
 
@@ -28,6 +30,11 @@ RUN unzip -d /tmp/extracted-jdbc /tmp/db2-jdbc-sqlj/jdbc_sqlj/db2_db2driver_for_
 
 ARG BASE_IMAGE=debian:9
 FROM ${BASE_IMAGE}
+
+ENV REFRESHED_AT=2019-03-19
+
+LABEL Name="senzing/python-db2-base" \
+      Version="1.0.0"
 
 # Copy files from "builder" stage.
 
@@ -137,25 +144,5 @@ COPY ./rootfs /
 
 # Runtime execution.
 
-# ENTRYPOINT ["/app/docker-entrypoint.sh"]
-# CMD ["python"]
-CMD ["/bin/bash"]
-
-
-# Residual CentOS -------------------------------------------------------------
-
-# Install prerequisites.
-
-#RUN yum -y update; yum clean all
-#RUN yum -y install epel-release; yum clean all
-#RUN yum -y install \
-#    gcc-c++ \
-#    ksh \
-#    libstdc++ \
-#    mysql-connector-odbc \
-#    pam \
-#    unixODBC \
-#    unixODBC-devel \
-#    unzip \
-#    wget; \
-#    yum clean all
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
+CMD ["python"]
