@@ -17,32 +17,129 @@ To see a demonstration of senzing, python, and db2, see
     1. [Space](#space)
     1. [Time](#time)
     1. [Background knowledge](#background-knowledge)
-1. [Build](#build)
-    1. [Prerequisite software](#prerequisite-software)
-    1. [Set environment variables for development](#set-environment-variables-for-development)
-    1. [Clone repository](#clone-repository)
-    1. [Download ibm_data_server_driver_for_odbc_cli_linuxx64_v11.1.tar.gz](#download-ibm_data_server_driver_for_odbc_cli_linuxx64_v111targz)
-    1. [Build docker image](#build-docker-image)  
 1. [Demonstrate](#demonstrate)
+    1. [Build docker image](#build-docker-image)
     1. [Create SENZING_DIR](#create-senzing_dir)
-    1. [Set environment variables for demonstration](#set-environment-variables-for-demonstration)
+    1. [Configuration](#configuration)
     1. [Run docker container](#run-docker-container)
+1. [Develop](#develop)
+    1. [Prerequisite software](#prerequisite-software)
+    1. [Clone repository](#clone-repository)
+    1. [Downloads](#downloads)
+    1. [Build docker image for development](#build-docker-image-for-development)
 
 ## Expectations
 
 ### Space
 
-This repository and demonstration require 20 GB free disk space.
+This repository and demonstration require 6 GB free disk space.
 
 ### Time
 
-Budget 1 hour to get the demonstration up-and-running, depending on CPU and network speeds.
+Budget 40 minutes to get the demonstration up-and-running, depending on CPU and network speeds.
 
 ### Background knowledge
 
 This repository assumes a working knowledge of:
 
 1. [Docker](https://github.com/Senzing/knowledge-base/blob/master/WHATIS/docker.md)
+
+## Demonstrate
+
+### Build docker image
+
+See [Develop](#develop).
+
+### Create SENZING_DIR
+
+1. If you do not already have an `/opt/senzing` directory on your local system, visit
+   [HOWTO - Create SENZING_DIR](https://github.com/Senzing/knowledge-base/blob/master/HOWTO/create-senzing-dir.md).
+
+### Configuration
+
+- **SENZING_DATABASE_URL** -
+  Database URI in the form: `${DATABASE_PROTOCOL}://${DATABASE_USERNAME}:${DATABASE_PASSWORD}@${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_DATABASE}`
+- **SENZING_DEBUG** -
+  Enable debug information. Values: 0=no debug; 1=debug. Default: 0.
+- **SENZING_DIR** -
+  Location of Senzing libraries. Default: "/opt/senzing".
+
+### Run docker container
+
+#### Variation 1
+
+1. Run the docker container with internal SQLite database and external volume.  Example:
+
+    ```console
+    export SENZING_DIR=/opt/senzing
+
+    sudo docker run \
+      --interactive \
+      --rm \
+      --tty \
+      --volume ${SENZING_DIR}:/opt/senzing \
+      senzing/python-db2-base
+    ```
+
+#### Variation 2
+
+1. Run the docker container with external database and volumes.  Example:
+
+    ```console
+    export DATABASE_PROTOCOL=db2
+    export DATABASE_USERNAME=db2inst1
+    export DATABASE_PASSWORD=db2inst1
+    export DATABASE_HOST=name-of-db2-container
+    export DATABASE_PORT=50000
+    export DATABASE_DATABASE=G2
+
+    export SENZING_DATABASE_URL="${DATABASE_PROTOCOL}://${DATABASE_USERNAME}:${DATABASE_PASSWORD}@${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_DATABASE}"
+    export SENZING_DIR=/opt/senzing
+
+    sudo docker run \
+      --env SENZING_DATABASE_URL="${SENZING_DATABASE_URL}" \
+      --interactive \
+      --rm \
+      --tty \
+      --volume ${SENZING_DIR}:/opt/senzing \
+      senzing/python-db2-base
+    ```
+
+#### Variation 3
+
+1. Run the docker container accessing an external database in a docker network. Example:
+
+   Determine docker network. Example:
+
+    ```console
+    sudo docker network ls
+
+    # Choose value from NAME column of docker network ls
+    export SENZING_NETWORK=nameofthe_network
+    ```
+
+    Run docker container. Example:
+
+    ```console
+    export DATABASE_PROTOCOL=db2
+    export DATABASE_USERNAME=db2inst1
+    export DATABASE_PASSWORD=db2inst1
+    export DATABASE_HOST=name-of-db2-container
+    export DATABASE_PORT=50000
+    export DATABASE_DATABASE=G2
+
+    export SENZING_DATABASE_URL="${DATABASE_PROTOCOL}://${DATABASE_USERNAME}:${DATABASE_PASSWORD}@${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_DATABASE}"
+    export SENZING_DIR=/opt/senzing
+
+    sudo docker run \
+      --env SENZING_DATABASE_URL="${SENZING_DATABASE_URL}" \
+      --interactive \
+      --net ${SENZING_NETWORK} \
+      --rm \
+      --tty \
+      --volume ${SENZING_DIR}:/opt/senzing \
+      senzing/python-db2-base
+    ```
 
 ## Develop
 
@@ -78,22 +175,13 @@ The following software programs need to be installed.
     sudo docker run hello-world
     ```
 
-### Set environment variables for development
-
-1. These variables may be modified, but do not need to be modified.
-   The variables are used throughout the installation procedure.
-
-    ```console
-    export DOCKER_IMAGE_TAG=senzing/python-db2-base
-    ```
-
 ### Clone repository
 
-1. Using these environment variable values:
+1. Set these environment variable values:
 
     ```console
     export GIT_ACCOUNT=senzing
-    export GIT_REPOSITORY=docker-python-db2-base    
+    export GIT_REPOSITORY=docker-python-db2-base
     ```
 
    Then follow steps in [clone-repository](https://github.com/Senzing/knowledge-base/blob/master/HOWTO/clone-repository.md).
@@ -113,7 +201,7 @@ The following software programs need to be installed.
     1. Click on "[IBM Data Server Driver for ODBC and CLI (CLI Driver)](http://www.ibm.com/services/forms/preLogin.do?source=swg-idsoc97)" link.
     1. Select :radio_button:  "IBM Data Server Driver for ODBC and CLI (Linux AMD64 and Intel EM64T)"
     1. Choose download method and click "Download now" button.
-    1. Download `ibm_data_server_driver_for_odbc_cli_linuxx64_v11.1.tar.gz` to ${GIT_REPOSITORY_DIR}/[downloads](./downloads) directory. 
+    1. Download `ibm_data_server_driver_for_odbc_cli_linuxx64_v11.1.tar.gz` to ${GIT_REPOSITORY_DIR}/[downloads](./downloads) directory.
 
 #### Download v11.1.4fp4a_jdbc_sqlj.tar.gz
 
@@ -121,105 +209,24 @@ The following software programs need to be installed.
     1. In DB2 Version 11.1 > JDBC 3.0 Driver version, click on "3.72.52" link.
     1. Click on "DSClients--jdbc_sqlj-11.1.4.4-FP004a" link.
     1. Click on "v11.1.4fp4a_jdbc_sqlj.tar.gz" link to download.
-    1. Download `v11.1.4fp4a_jdbc_sqlj.tar.gz` to ${GIT_REPOSITORY_DIR}/[downloads](./downloads) directory. 
+    1. Download `v11.1.4fp4a_jdbc_sqlj.tar.gz` to ${GIT_REPOSITORY_DIR}/[downloads](./downloads) directory.
 
-### Build docker image
+### Build docker image for development
 
-1. Option #1 - Using make command
-
-    ```console
-    cd ${GIT_REPOSITORY_DIR}
-    make docker-build
-    ```
-
-1. Option #2 - Using docker command
+1. Variation #1 - Using `make` command.
 
     ```console
     cd ${GIT_REPOSITORY_DIR}
-    docker build --tag ${DOCKER_IMAGE_TAG} .
+    sudo make docker-build
     ```
 
-## Demonstrate
+    Note: `sudo make docker-build-base` can be used to create cached docker layers.
 
-### Create SENZING_DIR
-
-1. If you do not already have an `/opt/senzing` directory on your local system, visit
-   [HOWTO - Create SENZING_DIR](https://github.com/Senzing/knowledge-base/blob/master/HOWTO/create-senzing-dir.md).
-
-### Set environment variables for demonstration
-
-1. Identify the Senzing directory.
-   Example:
+1. Variation #2 - Using `docker` command.
 
     ```console
-    export SENZING_DIR=/opt/senzing
-    ```
+    export DOCKER_IMAGE_NAME=senzing/python-db2-base
 
-1. Identify the database username and password.
-   Example:
-
-    ```console
-    export DB2_USERNAME=db2inst1
-    export DB2_PASSWORD=db2inst1
-    ```
-
-1. Identify the database that is the target of the SQL statements.
-   Example:
-
-    ```console
-    export DB2_DATABASE=G2
-    ```
-
-1. Identify the host and port running DB2 server.
-   Example:
-
-    ```console
-    docker ps
-
-    # Choose value from NAMES column of docker ps
-    export DB2_HOST=docker-container-name
-    ```
-
-    ```console
-    export DB2_PORT=50000
-    ```
-
-### Run docker container
-
-1. **Option #1** - Run the docker container without database or volumes.
-
-    ```console
-    docker run -it \
-      senzing/python-db2-base
-    ```
-
-1. **Option #2** - Run the docker container with database and volumes.
-
-    ```console
-    docker run -it  \
-      --volume ${SENZING_DIR}:/opt/senzing \
-      --env SENZING_DATABASE_URL="db2://${DB2_USERNAME}:${DB2_PASSWORD}@${DB2_HOST}:${DB2_PORT}/${DB2_DATABASE}" \
-      senzing/python-db2-base
-    ```
-
-1. **Option #3** - Run the docker container accessing a database in a docker network.
-
-    Identify the Docker network of the DB2 database.
-    Example:
-
-    ```console
-    docker network ls
-
-    # Choose value from NAME column of docker network ls
-    export DB2_NETWORK=nameofthe_network
-    ```
-
-    Run docker container.
-
-    ```console
-    docker run -it  \
-      --volume ${SENZING_DIR}:/opt/senzing \
-      --net ${DB2_NETWORK} \
-      --env SENZING_DATABASE_URL="db2://${DB2_USERNAME}:${DB2_PASSWORD}@${DB2_HOST}:{DB2_PORT}/${DB2_DATABASE}" \
-      senzing/python-db2-base
+    cd ${GIT_REPOSITORY_DIR}
+    sudo docker build --tag ${DOCKER_IMAGE_NAME} .
     ```
