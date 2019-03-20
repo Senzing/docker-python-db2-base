@@ -108,7 +108,7 @@ COPY --from=builder [ \
 
 # FIXME: For testing only.
 
-ADD ./downloads/ibm_data_server_driver_for_odbc_cli_linuxx64_v11.1.tar.gz /opt/IBM/db2
+# COPY --from=builder /opt/IBM/db2  /opt/IBM/db2
 
 # Install packages via apt.
 
