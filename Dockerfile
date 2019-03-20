@@ -36,6 +36,30 @@ ENV REFRESHED_AT=2019-03-19
 LABEL Name="senzing/python-db2-base" \
       Version="1.0.0"
 
+# Install packages via apt.
+
+RUN apt-get update \
+ && apt-get -y install \
+      curl \
+      gnupg \
+      jq \
+      lsb-core \
+      lsb-release \
+      python-dev \
+      python-pip \
+      python-pyodbc \
+      sqlite \
+      unixodbc \
+      unixodbc-dev \
+      wget \
+ && rm -rf /var/lib/apt/lists/*
+
+# Install packages via pip.
+
+RUN pip install \
+    psutil \
+    pyodbc
+
 # Copy files from "builder" stage.
 
 COPY --from=builder [ \
@@ -76,9 +100,7 @@ COPY --from=builder [ \
     ]
 
 COPY --from=builder [ \
-    "/opt/IBM/db2/clidriver/lib/libdb2.so", \
     "/opt/IBM/db2/clidriver/lib/libdb2.so.1", \
-    "/opt/IBM/db2/clidriver/lib/libdb2o.so", \
     "/opt/IBM/db2/clidriver/lib/libdb2o.so.1", \
     "/opt/IBM/db2/clidriver/lib/" \
     ]
@@ -106,33 +128,26 @@ COPY --from=builder [ \
     "/opt/IBM/db2/jdbc/" \
     ]
 
+# FIXME: The following files have not yet been approved for distribution, but are necessary.
+
+#COPY --from=builder [ \
+#    "/opt/IBM/db2/clidriver/lib/icc/libgsk8cms_64.so", \
+#    "/opt/IBM/db2/clidriver/lib/icc/libgsk8iccs_64.so", \
+#    "/opt/IBM/db2/clidriver/lib/icc/libgsk8km_64.so", \
+#    "/opt/IBM/db2/clidriver/lib/icc/libgsk8ssl_64.so", \
+#    "/opt/IBM/db2/clidriver/lib/icc/libgsk8sys_64.so", \
+#    "/opt/IBM/db2/clidriver/lib/icc/" \
+#    ]
+
+#COPY --from=builder [ \
+#    "/opt/IBM/db2/clidriver/lib/icc/C/icc/icclib/ICCSIG.txt", \
+#    "/opt/IBM/db2/clidriver/lib/icc/C/icc/icclib/libicclib084.so", \
+#    "/opt/IBM/db2/clidriver/lib/icc/C/icc/icclib/" \
+#    ]
+
 # FIXME: For testing only.
 
 # COPY --from=builder /opt/IBM/db2  /opt/IBM/db2
-
-# Install packages via apt.
-
-RUN apt-get update \
- && apt-get -y install \
-      curl \
-      gnupg \
-      jq \
-      lsb-core \
-      lsb-release \
-      python-dev \
-      python-pip \
-      python-pyodbc \
-      sqlite \
-      unixodbc \
-      unixodbc-dev \
-      wget \
- && rm -rf /var/lib/apt/lists/*
-
-# Install packages via pip.
-
-RUN pip install \
-    psutil \
-    pyodbc
 
 # Set environment variables.
 
@@ -145,6 +160,12 @@ ENV PATH=$PATH:/opt/IBM/db2/clidriver/adm:/opt/IBM/db2/clidriver/bin
 # Copy files from repository.
 
 COPY ./rootfs /
+
+# Create files and links.
+
+RUN touch /opt/IBM/db2/clidriver/bin/crypto_not_installed \
+ && ln -s /opt/IBM/db2/clidriver/lib/libdb2.so.1  /opt/IBM/db2/clidriver/lib/libdb2.so \
+ && ln -s /opt/IBM/db2/clidriver/lib/libdb2o.so.1 /opt/IBM/db2/clidriver/lib/libdb2o.so
 
 # Runtime execution.
 
