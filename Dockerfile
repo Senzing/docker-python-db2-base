@@ -129,6 +129,9 @@ COPY --from=builder [ \
     ]
 
 # FIXME: The following files have not yet been approved for distribution, but are necessary.
+# Once the files are approved for distribution:
+#  1) db2dsdriver.cfg: Remove "Authentication" and "SecurityTransportMode" parameters.
+#  2) Remove "RUN touch /opt/IBM/db2/clidriver/bin/crypto_not_installed" from this Dockerfile.
 
 #COPY --from=builder [ \
 #    "/opt/IBM/db2/clidriver/lib/icc/libgsk8cms_64.so", \
