@@ -1,8 +1,9 @@
+ARG BASE_IMAGE=debian:9
+
 # -----------------------------------------------------------------------------
 # Stage: builder
 # -----------------------------------------------------------------------------
 
-ARG BASE_IMAGE=debian:9
 FROM ${BASE_IMAGE} as builder
 
 ENV REFRESHED_AT=2019-03-19
@@ -28,10 +29,9 @@ RUN unzip -d /tmp/extracted-jdbc /tmp/db2-jdbc-sqlj/jdbc_sqlj/db2_db2driver_for_
 # Final stage
 # -----------------------------------------------------------------------------
 
-ARG BASE_IMAGE=debian:9
 FROM ${BASE_IMAGE}
 
-ENV REFRESHED_AT=2019-03-19
+ENV REFRESHED_AT=2019-03-22
 
 LABEL Name="senzing/python-db2-base" \
       Version="1.0.0"
